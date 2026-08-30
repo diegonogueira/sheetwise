@@ -111,7 +111,14 @@ export function Sidebar({ module, onSelect, open, onClose }: SidebarProps) {
       {open && (
         <div className="fixed inset-0 z-40 lg:hidden">
           <div className="absolute inset-0 bg-black/30" onClick={onClose} />
-          <div className="absolute inset-y-0 left-0 w-64 overflow-y-auto bg-surface px-3 py-3 shadow-xl">
+          {/* drawer de altura total: reserva as safe-areas do topo e da base */}
+          <div
+            className="absolute inset-y-0 left-0 w-64 overflow-y-auto bg-surface px-3 shadow-xl"
+            style={{
+              paddingTop: 'calc(0.75rem + var(--safe-area-inset-top, env(safe-area-inset-top)))',
+              paddingBottom: 'calc(0.75rem + var(--safe-area-inset-bottom, env(safe-area-inset-bottom)))',
+            }}
+          >
             <Nav
               module={module}
               onSelect={(m) => {

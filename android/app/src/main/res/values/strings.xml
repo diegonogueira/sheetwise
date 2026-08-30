@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">Sheetwise</string>
+    <string name="title_activity_main">Sheetwise</string>
+    <string name="package_name">app.sheetwise</string>
+    <string name="custom_url_scheme">app.sheetwise</string>
+</resources>

@@ -11,6 +11,7 @@ import { useShortLandscape } from './hooks/useMediaQuery'
 import { clefSetOf, isNoteModule, taskOf } from './core/module'
 import type { KeyConfig, NoteConfig } from './core/exercise'
 import { loadInstrument, playMidi } from './audio/player'
+import { syncStatusBar } from './native/statusBar'
 import { cx } from './lib/cx'
 
 export default function App() {
@@ -52,6 +53,11 @@ export default function App() {
     if (audioEnabled) void loadInstrument()
   }, [audioEnabled])
 
+  // no Android: status bar escondida na paisagem, visível (sem cobrir) no retrato
+  useEffect(() => {
+    void syncStatusBar(compact)
+  }, [compact])
+
   // título do módulo: grupo (tarefa) + conjunto de claves, como no menu
   const setId = clefSetOf(module)
   const moduleTitle = isNoteModule(module)
@@ -65,6 +71,17 @@ export default function App() {
 
   return (
     <div className={cx('flex flex-col', compact ? 'h-[100dvh] overflow-hidden' : 'min-h-screen')}>
+      {/* reserva a área da status bar no retrato (o Android 15+ desenha edge-to-edge): o
+          relógio e a bateria ficam sobre o fundo do app, não sobre o conteúdo. Na paisagem
+          a status bar é escondida, o inset vira 0 e a faixa some sozinha. */}
+      <div
+        aria-hidden
+        className="fixed inset-x-0 top-0 z-40"
+        style={{
+          height: 'var(--safe-area-inset-top, env(safe-area-inset-top))',
+          backgroundColor: 'var(--color-bg)',
+        }}
+      />
       <TopBar
         modeTitle={moduleTitle}
         onOpenSettings={() => setSettingsOpen(true)}

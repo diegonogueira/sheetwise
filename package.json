@@ -9,9 +9,14 @@
     "build": "tsc --noEmit && vite build",
     "preview": "vite preview",
     "test": "vitest run",
-    "test:watch": "vitest"
+    "test:watch": "vitest",
+    "android:apk": "npm run build && cap sync android && android/gradlew -p android assembleDebug",
+    "android:install": "adb install -r android/app/build/outputs/apk/debug/app-debug.apk"
   },
   "dependencies": {
+    "@capacitor/android": "^8.5.0",
+    "@capacitor/core": "^8.5.0",
+    "@capacitor/status-bar": "^8.0.3",
     "i18next": "^26.3.3",
     "lucide-react": "^1.21.0",
     "react": "^18.3.1",
@@ -22,6 +27,7 @@
     "zustand": "^5.0.14"
   },
   "devDependencies": {
+    "@capacitor/cli": "^8.5.0",
     "@tailwindcss/vite": "^4.3.1",
     "@types/react": "^18.3.31",
     "@types/react-dom": "^18.3.7",

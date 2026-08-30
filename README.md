@@ -52,6 +52,19 @@ npm run preview  # serve o build de produção
 npm test         # testes do núcleo musical (Vitest)
 ```
 
+### Android
+
+O app roda no celular pelo Capacitor — o mesmo build web dentro de um WebView.
+
+```bash
+JAVA_HOME=/usr/lib/jvm/java-21-openjdk npm run android:apk  # gera o APK de debug
+npm run android:install                                     # instala no aparelho via adb
+./scripts/gen-icons.sh                                      # regenera os ícones do launcher
+```
+
+O Gradle 8.14 não aceita JDK 26, daí o `JAVA_HOME` apontando para o 21. O APK sai em
+`android/app/build/outputs/apk/debug/app-debug.apk`.
+
 ## Stack
 
 - **React 18 + TypeScript + Vite** — base web.

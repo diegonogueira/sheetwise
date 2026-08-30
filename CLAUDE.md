@@ -18,6 +18,10 @@ npm run test:watch   # vitest watch
 
 npx vitest run src/core/clef.test.ts    # single test file
 npx vitest run -t "linha inferior"       # single test by name
+
+npm run android:apk      # build + cap sync + gradle assembleDebug
+npm run android:install  # adb install -r … app-debug.apk
+./scripts/gen-icons.sh   # launcher icons from src/assets/brand/*.svg
 ```
 
 `npm run build` fails on unused locals/parameters (strict TS with
@@ -156,6 +160,24 @@ the hint label, for instance — silently breaks the hover.
    about a space and a half above the notehead, so a fixed margin clipped the accidental of
    the highest note in the range.
 
+## Android (Capacitor)
+
+`npm run android:apk` needs **JDK 21** — the Gradle wrapper is 8.14 and does not accept the
+JDK 26 that is the system default here, so run it as
+`JAVA_HOME=/usr/lib/jvm/java-21-openjdk npm run android:apk`. The APK lands in
+`android/app/build/outputs/apk/debug/`.
+
+The web app is the whole app: Capacitor only wraps `dist/`, so `cap sync` copies the same
+build the browser gets. The single native touch is `src/native/statusBar.ts`, a no-op off
+device: the status bar is hidden in short landscape (the compact layout, so the staff owns
+the screen) and shown in portrait. Android 15+ draws edge-to-edge regardless, so `TopBar`
+and the sidebar drawer also pad themselves with `--safe-area-inset-*` (the variable comes
+from Capacitor, `env()` is the web fallback, both 0 in the browser).
+
+Launcher icons are generated, never hand-edited: `./scripts/gen-icons.sh` renders every
+mipmap from `src/assets/brand/icon.svg` (the tile, same art as the favicon) and
+`icon-fg.svg` (art only, in the 108-grid with the 66 safe zone the launcher crops to).
+
 ## Verifying UI changes
 
 There are no component/E2E tests — only `src/core/*.test.ts` and `src/lib/routes.test.ts`
@@ -166,7 +188,7 @@ There are no component/E2E tests — only `src/core/*.test.ts` and `src/lib/rout
 
 ## Not yet built
 
-Branding (app icon, favicons, a `gen-brand.sh` like fretwise's), Capacitor/Android
-packaging, progress statistics, and the reverse key-signature module (given a key, build the
-signature). The original implementation plan is at
-`~/.claude/plans/sleepy-roaming-starfish.md`.
+Web branding beyond the minimal `favicon.svg` (raster favicons, PWA icons — the Android
+launcher icons *are* generated, see above), a signed release build, progress statistics, and
+the reverse key-signature module (given a key, build the signature). The original
+implementation plan is at `~/.claude/plans/sleepy-roaming-starfish.md`.

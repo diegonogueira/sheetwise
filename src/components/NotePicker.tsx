@@ -1,5 +1,6 @@
 import { useTranslation } from 'react-i18next'
 import { ALTER_SYMBOL, STEPS, stepLabel, type Alter, type Naming, type Spelled } from '../core/pitch'
+import { AccidentalGlyph } from './Staff/AccidentalGlyph'
 import { cx } from '../lib/cx'
 
 /**
@@ -24,9 +25,9 @@ interface NotePickerProps {
 const ALTERS: Alter[] = [-1, 0, 1]
 
 /**
- * ♭ ♮ ♯ são glifos musicais: no mesmo corpo de fonte das letras eles saem bem menores
- * (têm muito espaço em branco em volta) e viram um alvo pequeno demais no celular. Daí o
- * corpo maior e a largura folgada — o botão fica com ~44px, o mínimo de toque confortável.
+ * ♭ ♮ ♯ vêm da fonte musical (ver `AccidentalGlyph`), não da fonte da interface: assim o
+ * botão mostra o mesmo sinal que aparece na pauta e os três ficam alinhados entre si. O
+ * botão tem ~44px, o mínimo de toque confortável no celular.
  */
 export function AlterPicker({
   alter,
@@ -46,14 +47,12 @@ export function AlterPicker({
           onClick={() => onAlter(a)}
           aria-pressed={alter === a}
           className={cx(
-            // flex + altura fixa em vez de padding: cada glifo (♭ tem haste, ♯ é simétrico,
-            // ♮ é alto) tem métrica própria, e só o centro da CAIXA os alinha entre si
-            'flex items-center justify-center rounded-lg leading-none transition-colors',
-            compact ? 'h-8 w-11 text-xl' : 'h-11 w-14 text-2xl',
-            alter === a ? 'bg-surface font-semibold text-ink shadow-sm' : 'text-muted hover:text-ink',
+            'flex items-center justify-center rounded-lg transition-colors',
+            compact ? 'h-8 w-11' : 'h-11 w-14',
+            alter === a ? 'bg-surface text-ink shadow-sm' : 'text-faint hover:text-ink',
           )}
         >
-          {a === 0 ? '♮' : ALTER_SYMBOL[a]}
+          <AccidentalGlyph alter={a} point={compact ? 26 : 34} />
         </button>
       ))}
     </div>

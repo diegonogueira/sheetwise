@@ -78,6 +78,16 @@ body {
   stroke-width: 1.5;
 }
 
+/* glifo de acidente nos botões: segue a cor do texto do botão (inclusive no estado
+   selecionado), e o SVG já vem recortado na tinta, então o flex do botão o centraliza */
+.accidental-glyph {
+  display: block;
+}
+.accidental-glyph path {
+  fill: currentColor;
+  stroke: none;
+}
+
 /* a pauta é desenhada em pixels naturais; a caixa se ajusta ao conteúdo */
 .staff svg {
   display: block;

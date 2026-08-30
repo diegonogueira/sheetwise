@@ -1,0 +1,9 @@
+services:
+  sheetwise:
+    build: .
+    container_name: sheetwise
+    ports:
+      # porta do host configurável: defina SHEETWISE_PORT (ex.: num .env) se 8081
+      # já estiver ocupada no homelab. O container sempre escuta na 80.
+      - "${SHEETWISE_PORT:-8081}:80"
+    restart: unless-stopped

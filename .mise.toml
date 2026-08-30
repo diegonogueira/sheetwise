@@ -1,0 +1,4 @@
+# Ferramentas necessárias para desenvolver o Sheetwise.
+# Instale com `mise install` (lê este arquivo). `mise current` mostra as versões ativas.
+[tools]
+node = "25.8.0"

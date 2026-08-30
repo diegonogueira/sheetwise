@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState } from 'react'
+import { useCallback, useState } from 'react'
 import {
   checkKey,
   checkNoteName,
@@ -93,15 +93,16 @@ export function useExercise({ module, note, key, onReveal }: UseExerciseArgs): E
 
   // Regenera ao trocar de módulo ou de configuração. As configs chegam memoizadas do App,
   // então a identidade só muda quando um valor muda de fato.
-  const firstRun = useRef(true)
-  useEffect(() => {
-    if (firstRun.current) {
-      firstRun.current = false
-      return
-    }
+  //
+  // Isto acontece DURANTE o render (o padrão do React para ajustar estado quando uma prop
+  // muda), e não num efeito: num efeito sobraria um quadro com a questão do módulo antigo,
+  // e cada tarefa lê campos que só a sua questão tem — a tonalidade lendo `keyChoices` de
+  // uma questão de nota quebrava a tela, que só voltava com um F5.
+  const [source, setSource] = useState({ module, note, key })
+  if (source.module !== module || source.note !== note || source.key !== key) {
+    setSource({ module, note, key })
     newQuestion()
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [module, note, key])
+  }
 
   return {
     module,

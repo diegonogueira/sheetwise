@@ -95,7 +95,11 @@ the new entries wherever a `Record<Module, …>` is used. The menu (`Sidebar.tsx
   **read**, so persisted states never need a migration for a new option. Renaming or
   removing a field **does** need a `version` bump plus a `migrate`.
 - **`useExercise`** (`src/hooks/useExercise.ts`): the current question and answer. Per
-  session, reset on every `next()` and on every module or config change.
+  session, reset on every `next()` and on every module or config change. That reset happens
+  **during render** (React's "adjust state when a prop changes"), never in an effect: an
+  effect would leave one frame holding the previous module's question, and each task body
+  reads fields only its own question has — `ReadKeyBody` hitting a note question's missing
+  `keyChoices` blanked the screen until a reload.
 
 Config objects passed to `useExercise` must be memoized in `App.tsx` (`useMemo`) — the hook
 regenerates the question whenever a config **reference** changes.

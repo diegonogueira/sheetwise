@@ -197,15 +197,19 @@ export function Staff({
       const areaWidth = stave.getNoteEndX() - areaStart
       new Formatter().joinVoices([voice]).format([voice], areaWidth)
 
-      // centraliza pela CAIXA das notas (posição + largura), senão a última encosta ou
-      // vaza a borda direita da pauta; o clamp garante que nada saia da área útil
+      // Centraliza pela CAIXA das notas (posição + largura), senão a última encosta ou vaza
+      // a borda direita da pauta.
+      //
+      // A conta é feita no espaço do FORMATTER: `getAbsoluteX` é relativo ao começo da área
+      // de notas — a clave e a armadura já saíram dele. Somar `getNoteStartX` aqui contava a
+      // largura delas duas vezes e empurrava a nota contra a barra final; com armadura, que
+      // é mais larga que a clave sozinha, ficava escancarado.
       const lefts = notes.map((n) => n.getAbsoluteX())
       const contentL = Math.min(...lefts)
       const contentR = Math.max(...notes.map((n, i) => lefts[i] + n.getWidth()))
-      const flushLeft = areaStart - contentL
-      const flushRight = areaStart + areaWidth - contentR
-      const centered = flushLeft + (flushRight - flushLeft) / 2
-      const shift = flushRight < flushLeft ? flushLeft : Math.min(Math.max(centered, flushLeft), flushRight)
+      // conteúdo mais largo que a área: encosta à esquerda em vez de sangrar dos dois lados
+      const free = Math.max(0, areaWidth - (contentR - contentL))
+      const shift = free / 2 - contentL
       // O deslocamento vai no TickContext, NÃO em `setXShift`: o `x_shift` da nota é do
       // próprio VexFlow, que o usa para abrir espaço ao acidente. Sobrescrevê-lo movia só a
       // cabeça — o acidente se posiciona pelo X absoluto (que vem do TickContext) e ficava

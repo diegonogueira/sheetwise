@@ -9,9 +9,9 @@ import type { Naming } from '../core/pitch'
 
 /** Configs que cada módulo lembra separadamente. */
 export interface ModuleConfig {
-  /** linhas suplementares abaixo da pauta (0–2) */
+  /** linhas suplementares abaixo da pauta (ver `LEDGER_COUNTS`) */
   ledgerBelow: LedgerCount
-  /** linhas suplementares acima da pauta (0–2) */
+  /** linhas suplementares acima da pauta (ver `LEDGER_COUNTS`) */
   ledgerAbove: LedgerCount
   /** inclui sustenidos e bemóis nas questões */
   accidentals: boolean
@@ -103,7 +103,26 @@ export const useSettings = create<SettingsState>()(
       setKeyMaxAccidentals: (keyMaxAccidentals) => set({ keyMaxAccidentals }),
       toggleKeyClef: (clef) => set((s) => ({ keyClefs: toggleKeepingOne(s.keyClefs, clef) })),
     }),
-    { name: 'sheetwise-settings', version: 1 },
+    {
+      name: 'sheetwise-settings',
+      version: 2,
+      /**
+       * v1 gravava `accidentals: false` em cada módulo. Como o backfill da leitura só
+       * preenche campo AUSENTE (para não desfazer escolha de quem configurou), mudar o
+       * padrão não alcançaria quem já tinha aberto o app: os módulos continuariam só com
+       * notas naturais. A migração liga os acidentes em todos os módulos, uma vez.
+       */
+      migrate: (persisted: unknown, version: number) => {
+        const state = (persisted ?? {}) as Partial<SettingsState>
+        if (version >= 2) return state
+        const stored = state.modules
+        const modules = modulesFrom(DEFAULT_MODULE_CONFIG)
+        for (const m of MODULES) {
+          modules[m] = { ...DEFAULT_MODULE_CONFIG, ...stored?.[m], accidentals: true }
+        }
+        return { ...state, modules }
+      },
+    },
   ),
 )
 

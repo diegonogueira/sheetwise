@@ -89,11 +89,14 @@ the new entries wherever a `Record<Module, …>` is used. The menu (`Sidebar.tsx
 
 ## State is split in two
 
-- **`useSettings`** (`src/store/settings.ts`, zustand + `persist`, key `sheetwise-settings`):
-  what the user chose. Adding a top-level field is safe. Adding a `ModuleConfig` field is
-  safe too — `useModuleConfig` backfills missing fields from `DEFAULT_MODULE_CONFIG` on
-  **read**, so persisted states never need a migration for a new option. Renaming or
-  removing a field **does** need a `version` bump plus a `migrate`.
+- **`useSettings`** (`src/store/settings.ts`, zustand + `persist`, key `sheetwise-settings`,
+  currently **version 2**): what the user chose. Adding a top-level field is safe. Adding a
+  `ModuleConfig` field is safe too — `useModuleConfig` backfills missing fields from
+  `DEFAULT_MODULE_CONFIG` on **read**, so persisted states never need a migration for a new
+  option. Renaming or removing a field **does** need a `version` bump plus a `migrate`.
+  So does *changing a default*: the backfill only fills what is **absent**, so a value
+  already written keeps winning (v2 exists for exactly that — it turned `accidentals` on
+  everywhere). Only migrate a default when the intent is to override past choices.
 - **`useExercise`** (`src/hooks/useExercise.ts`): the current question and answer. Per
   session, reset on every `next()` and on every module or config change. That reset happens
   **during render** (React's "adjust state when a prop changes"), never in an effect: an

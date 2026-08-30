@@ -1,0 +1,101 @@
+{
+  "app": {
+    "name": "Sheetwise"
+  },
+  "topbar": {
+    "aria": {
+      "menu": "Abrir menu",
+      "settings": "Configurações"
+    }
+  },
+  "nav": {
+    "group": {
+      "readNote": "Ler notas",
+      "markNote": "Marcar notas",
+      "readKey": "Tonalidade"
+    },
+    "item": {
+      "readKey": "Ler armadura"
+    }
+  },
+  "clefSet": {
+    "treble": "Clave de Sol",
+    "bass": "Clave de Fá",
+    "c": "Clave de Dó",
+    "piano": "Piano (Sol + Fá)",
+    "cello": "Violoncelo (Fá + Dó 4ª)",
+    "viola": "Viola (Dó 3ª + Sol)"
+  },
+  "clef": {
+    "treble": "Sol",
+    "bass": "Fá",
+    "alto": "Dó 3ª",
+    "tenor": "Dó 4ª",
+    "soprano": "Dó 1ª",
+    "mezzo": "Dó 2ª",
+    "baritone": "Dó 5ª"
+  },
+  "exercise": {
+    "next": "Próxima",
+    "readNote": {
+      "prompt": "Que nota é esta?",
+      "correct": "Certo! É {{note}}.",
+      "wrong": "Era {{note}} — você marcou {{chosen}}."
+    },
+    "markNote": {
+      "prompt": "Marque <note>{{note}}</note> na pauta.",
+      "hint": "Clique na linha ou no espaço certo.",
+      "correct": "Certo! {{note}} fica aí.",
+      "wrong": "Aí é {{chosen}}. {{note}} fica onde está marcado."
+    },
+    "readKey": {
+      "promptMajor": "Qual é a tonalidade maior desta armadura?",
+      "promptMinor": "Qual é a tonalidade menor desta armadura?",
+      "correct": "Certo! É {{key}}.",
+      "wrong": "Era {{key}} — você marcou {{chosen}}.",
+      "noAccidentals": "sem acidentes"
+    },
+    "key": {
+      "major": "{{tonic}} maior",
+      "minor": "{{tonic}} menor"
+    }
+  },
+  "settings": {
+    "title": "Configurações",
+    "aria": {
+      "close": "Fechar"
+    },
+    "yes": "Sim",
+    "no": "Não",
+    "naming": "Nomes das notas",
+    "namingLetters": "C D E",
+    "namingSolfege": "Dó Ré Mi",
+    "audio": "Som",
+    "audioOn": "Ligado",
+    "audioOff": "Desligado",
+    "moduleSection": "Neste módulo",
+    "ledgerBelow": "Linhas suplementares abaixo",
+    "ledgerAbove": "Linhas suplementares acima",
+    "accidentals": "Incluir acidentes",
+    "moduleHelp": "Cada módulo guarda estas opções separadamente.",
+    "cClefSection": "Clave de Dó",
+    "cClefLabel": "Linhas em que a clave aparece",
+    "cClefHelp": "A 3ª linha é a da viola; a 4ª, a do violoncelo e do trombone. As outras aparecem em partituras vocais antigas.",
+    "keySection": "Tonalidade",
+    "keyAsk": "Perguntar",
+    "keyAskMajor": "Maior",
+    "keyAskMinor": "Menor",
+    "keyAskBoth": "As duas",
+    "keyMax": "Até quantos acidentes",
+    "keyClefs": "Claves da armadura",
+    "keyHelp": "Uma armadura serve a uma tonalidade maior e à sua relativa menor, então o enunciado sempre diz qual está pedindo.",
+    "slotHints": "Escrever as letras na pauta"
+  },
+  "line": {
+    "1": "1ª",
+    "2": "2ª",
+    "3": "3ª",
+    "4": "4ª",
+    "5": "5ª"
+  }
+}

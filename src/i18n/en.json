@@ -1,0 +1,101 @@
+{
+  "app": {
+    "name": "Sheetwise"
+  },
+  "topbar": {
+    "aria": {
+      "menu": "Open menu",
+      "settings": "Settings"
+    }
+  },
+  "nav": {
+    "group": {
+      "readNote": "Read notes",
+      "markNote": "Mark notes",
+      "readKey": "Key signatures"
+    },
+    "item": {
+      "readKey": "Read the signature"
+    }
+  },
+  "clefSet": {
+    "treble": "Treble clef",
+    "bass": "Bass clef",
+    "c": "C clef",
+    "piano": "Piano (treble + bass)",
+    "cello": "Cello (bass + tenor)",
+    "viola": "Viola (alto + treble)"
+  },
+  "clef": {
+    "treble": "Treble",
+    "bass": "Bass",
+    "alto": "Alto",
+    "tenor": "Tenor",
+    "soprano": "Soprano",
+    "mezzo": "Mezzo-soprano",
+    "baritone": "Baritone"
+  },
+  "exercise": {
+    "next": "Next",
+    "readNote": {
+      "prompt": "Which note is this?",
+      "correct": "Correct! It's {{note}}.",
+      "wrong": "It was {{note}} — you picked {{chosen}}."
+    },
+    "markNote": {
+      "prompt": "Mark <note>{{note}}</note> on the staff.",
+      "hint": "Click the right line or space.",
+      "correct": "Correct! {{note}} goes there.",
+      "wrong": "That's {{chosen}}. {{note}} is where it's marked."
+    },
+    "readKey": {
+      "promptMajor": "Which major key has this signature?",
+      "promptMinor": "Which minor key has this signature?",
+      "correct": "Correct! It's {{key}}.",
+      "wrong": "It was {{key}} — you picked {{chosen}}.",
+      "noAccidentals": "no accidentals"
+    },
+    "key": {
+      "major": "{{tonic}} major",
+      "minor": "{{tonic}} minor"
+    }
+  },
+  "settings": {
+    "title": "Settings",
+    "aria": {
+      "close": "Close"
+    },
+    "yes": "Yes",
+    "no": "No",
+    "naming": "Note names",
+    "namingLetters": "C D E",
+    "namingSolfege": "Do Re Mi",
+    "audio": "Sound",
+    "audioOn": "On",
+    "audioOff": "Off",
+    "moduleSection": "This module",
+    "ledgerBelow": "Ledger lines below",
+    "ledgerAbove": "Ledger lines above",
+    "accidentals": "Include accidentals",
+    "moduleHelp": "Each module remembers these options separately.",
+    "cClefSection": "C clef",
+    "cClefLabel": "Lines the clef sits on",
+    "cClefHelp": "The 3rd line is the viola's; the 4th, the cello's and trombone's. The others appear in old vocal scores.",
+    "keySection": "Key signatures",
+    "keyAsk": "Ask for",
+    "keyAskMajor": "Major",
+    "keyAskMinor": "Minor",
+    "keyAskBoth": "Both",
+    "keyMax": "Up to how many accidentals",
+    "keyClefs": "Clefs for the signature",
+    "keyHelp": "A signature fits both a major key and its relative minor, so the prompt always says which one it wants.",
+    "slotHints": "Label the staff positions"
+  },
+  "line": {
+    "1": "1st",
+    "2": "2nd",
+    "3": "3rd",
+    "4": "4th",
+    "5": "5th"
+  }
+}

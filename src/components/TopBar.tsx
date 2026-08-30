@@ -25,9 +25,11 @@ export function TopBar({ modeTitle, onOpenSettings, onToggleSidebar }: TopBarPro
         <Menu size={18} />
       </button>
 
-      <span className="font-semibold tracking-tight text-ink">{t('app.name')}</span>
-      <span className="hidden text-sm text-faint sm:inline">·</span>
-      <span className="hidden truncate text-sm text-muted sm:inline">{modeTitle}</span>
+      {/* o módulo ativo é anunciado AQUI em qualquer largura: no celular ele era um título
+          no corpo da página, e aí empurrava o exercício para baixo do centro da tela */}
+      <span className="shrink-0 font-semibold tracking-tight text-ink">{t('app.name')}</span>
+      <span className="shrink-0 text-sm text-faint">·</span>
+      <span className="min-w-0 truncate text-sm text-muted">{modeTitle}</span>
 
       <button
         type="button"

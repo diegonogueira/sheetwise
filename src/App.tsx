@@ -70,7 +70,12 @@ export default function App() {
   }, [moduleTitle, i18n.language])
 
   return (
-    <div className={cx('flex flex-col', compact ? 'h-[100dvh] overflow-hidden' : 'min-h-screen')}>
+    <div
+      className={cx('flex flex-col', compact ? 'h-[100dvh] overflow-hidden' : 'min-h-screen')}
+      // a barra de gestos do Android é desenhada SOBRE o fim da WebView; sem descontá-la o
+      // centro do layout cai abaixo do centro do que se enxerga
+      style={{ paddingBottom: 'var(--safe-area-inset-bottom, env(safe-area-inset-bottom))' }}
+    >
       {/* reserva a área da status bar no retrato (o Android 15+ desenha edge-to-edge): o
           relógio e a bateria ficam sobre o fundo do app, não sobre o conteúdo. Na paisagem
           a status bar é escondida, o inset vira 0 e a faixa some sozinha. */}
@@ -96,18 +101,18 @@ export default function App() {
           onClose={() => setSidebarOpen(false)}
         />
 
-        {/* o exercício fica centrado na altura livre: encostado no topo, sobrava metade da
-            tela do celular vazia embaixo. `justify-center-safe` centraliza SEM cortar o
-            topo quando a pauta cresce (faixa larga, sistema de piano) e passa a rolar. */}
+        {/* O exercício ocupa o centro da altura livre. O nome do módulo vive na TopBar (e
+            aqui só para leitores de tela): como <h1> visível ele empurrava o cartão para
+            baixo do meio — uma linha fina de texto no topo, e o olho lendo o vazio acima
+            dela como topo, não como metade do miolo. `justify-center-safe` centraliza SEM
+            cortar o começo quando a pauta cresce (faixa larga, sistema de piano). */}
         <main
           className={cx(
             'mx-auto flex w-full max-w-3xl flex-1 flex-col justify-center-safe px-4',
             compact ? 'min-h-0 gap-2 overflow-y-auto py-2' : 'gap-4 py-5',
           )}
         >
-          <h1 className={cx('font-semibold text-ink', compact ? 'sr-only' : 'text-sm')}>
-            {moduleTitle}
-          </h1>
+          <h1 className="sr-only">{moduleTitle}</h1>
 
           <ExercisePanel
             exercise={exercise}

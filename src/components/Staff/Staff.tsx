@@ -51,8 +51,13 @@ const HINT_COLUMN = 11
 const STAVE_TOP_OFFSET = 40
 /** Quanto a clave passa da pauta (a de Sol é o glifo mais alto) — entra no enquadramento. */
 const CLEF_OVERHANG = 20
-/** Folga acima/abaixo da nota mais extrema (cabeça + acidente). */
-const NOTE_MARGIN = 14
+/**
+ * Folga acima/abaixo da nota mais extrema, em espaços de pauta. Não é a cabeça que manda:
+ * o ♭ sobe cerca de um espaço e meio acima dela, então uma folga fixa em pixels cortaria o
+ * acidente da nota mais aguda da faixa.
+ */
+const NOTE_MARGIN_SPACES = 2
+const noteMargin = (spacing: number) => NOTE_MARGIN_SPACES * spacing
 
 interface StaffProps {
   /** claves desenhadas, do grave ao agudo (uma só, ou as duas do sistema de piano) */
@@ -82,7 +87,7 @@ function canvasHeight(
   const body = 4 * spacing
   const ledger = (ledgerBelow + ledgerAbove) * spacing + 2 * CLEF_OVERHANG
   const gaps = (staves.length - 1) * STAVE_GAP
-  return STAVE_TOP_OFFSET + staves.length * body + gaps + ledger + 2 * NOTE_MARGIN
+  return STAVE_TOP_OFFSET + staves.length * body + gaps + ledger + 2 * noteMargin(spacing)
 }
 
 /**
@@ -197,7 +202,11 @@ export function Staff({
       const flushRight = areaStart + areaWidth - contentR
       const centered = flushLeft + (flushRight - flushLeft) / 2
       const shift = flushRight < flushLeft ? flushLeft : Math.min(Math.max(centered, flushLeft), flushRight)
-      for (const n of notes) n.setXShift(shift)
+      // O deslocamento vai no TickContext, NÃO em `setXShift`: o `x_shift` da nota é do
+      // próprio VexFlow, que o usa para abrir espaço ao acidente. Sobrescrevê-lo movia só a
+      // cabeça — o acidente se posiciona pelo X absoluto (que vem do TickContext) e ficava
+      // largado ao lado da clave, longe da nota que ele altera.
+      for (const tc of new Set(notes.map((n) => n.getTickContext()))) tc.setX(tc.getX() + shift)
 
       voice.draw(ctx, stave)
     }
@@ -215,10 +224,11 @@ export function Staff({
         const topLineY = stave.getYForLine(0)
         const spacing = stave.getSpacingBetweenLines()
         const range = staffRange(clef, ledgerBelow, ledgerAbove)
-        top = Math.min(top, yForDiatonic(range.hi, clef, topLineY, spacing) - NOTE_MARGIN, topLineY - CLEF_OVERHANG)
+        const margin = noteMargin(spacing)
+        top = Math.min(top, yForDiatonic(range.hi, clef, topLineY, spacing) - margin, topLineY - CLEF_OVERHANG)
         bottom = Math.max(
           bottom,
-          yForDiatonic(range.lo, clef, topLineY, spacing) + NOTE_MARGIN,
+          yForDiatonic(range.lo, clef, topLineY, spacing) + margin,
           topLineY + 4 * spacing + CLEF_OVERHANG,
         )
       }

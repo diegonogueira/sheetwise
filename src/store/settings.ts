@@ -20,8 +20,8 @@ export interface ModuleConfig {
 }
 
 const DEFAULT_MODULE_CONFIG: ModuleConfig = {
-  ledgerBelow: 1,
-  ledgerAbove: 1,
+  ledgerBelow: 3,
+  ledgerAbove: 3,
   accidentals: true,
   slotHints: false,
 }

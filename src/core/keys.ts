@@ -78,3 +78,14 @@ export function signatureSteps(sig: KeySignature): Step[] {
   const order = sig.fifths >= 0 ? SHARP_ORDER : FLAT_ORDER
   return order.slice(0, Math.abs(sig.fifths))
 }
+
+/**
+ * O acidente que a armadura impõe a um grau — 0 se ela não o altera.
+ *
+ * É a regra que faz a leitura com armadura ser um exercício de verdade: a nota é desenhada
+ * SEM acidente e quem diz que aquele Fá é Fá♯ é a armadura, não um sinal ao lado da nota.
+ */
+export function alterInKey(step: Step, sig: KeySignature): Alter {
+  if (!signatureSteps(sig).includes(step)) return 0
+  return sig.fifths > 0 ? 1 : -1
+}

@@ -14,7 +14,7 @@ import {
 import { CLEF_SET_IDS } from './clefSet'
 import { MODULES, isNoteModule, taskOf, type Module } from './module'
 import { diatonic, spelledAt, type Spelled } from './pitch'
-import { signatureByFifths, signaturesUpTo } from './keys'
+import { alterInKey, signatureByFifths, signaturesUpTo } from './keys'
 
 /** RNG determinístico (mulberry32) — as questões viram reproduzíveis. */
 function seeded(seed: number): Rng {
@@ -92,10 +92,44 @@ describe('readNote', () => {
     for (const seed of SEEDS) {
       const q = generateQuestion({
         module: 'readNote:treble',
-        note: noteCfg({ accidentals: false }),
+        note: noteCfg({ accidentalMode: 'none' }),
         rng: seeded(seed),
       })
       expect(q.note!.alter).toBe(0)
+    }
+  })
+
+  it('com armadura a nota é alterada PELA armadura, nunca por sorteio', () => {
+    for (const seed of SEEDS) {
+      const q = generateQuestion({
+        module: 'readNote:treble',
+        note: noteCfg({ accidentalMode: 'key' }),
+        rng: seeded(seed),
+      })
+      expect(q.keySig).toBeDefined()
+      expect(q.note!.alter).toBe(alterInKey(q.note!.step, q.keySig!))
+    }
+  })
+
+  it('a armadura respeita o teto de acidentes da config', () => {
+    for (const seed of SEEDS) {
+      const q = generateQuestion({
+        module: 'readNote:bass',
+        note: noteCfg({ accidentalMode: 'key', keyMax: 2 }),
+        rng: seeded(seed),
+      })
+      expect(Math.abs(q.keySig!.fifths)).toBeLessThanOrEqual(2)
+    }
+  })
+
+  it('sem armadura a questão não desenha armadura nenhuma', () => {
+    for (const mode of ['none', 'note'] as const) {
+      const q = generateQuestion({
+        module: 'readNote:treble',
+        note: noteCfg({ accidentalMode: mode }),
+        rng: seeded(5),
+      })
+      expect(q.keySig).toBeUndefined()
     }
   })
 
@@ -104,7 +138,7 @@ describe('readNote', () => {
     for (const seed of SEEDS) {
       const q = generateQuestion({
         module: 'readNote:treble',
-        note: noteCfg({ accidentals: true }),
+        note: noteCfg({ accidentalMode: 'note' }),
         rng: seeded(seed),
       })
       alters.add(q.note!.alter)
@@ -155,10 +189,24 @@ describe('markNote', () => {
     }
   })
 
+  it('com armadura, a posição vale com o acidente que a armadura impõe', () => {
+    for (const seed of SEEDS) {
+      const q = generateQuestion({
+        module: 'markNote:treble',
+        note: noteCfg({ accidentalMode: 'key' }),
+        rng: seeded(seed),
+      })
+      for (const slot of q.validSlots!) {
+        const imposed = alterInKey(spelledAt(slot).step, q.keySig!)
+        expect(checkSlot(q, slot, imposed)).toBe(true)
+      }
+    }
+  })
+
   it('recusa posição fora da lista e acidente errado', () => {
     const q = generateQuestion({
       module: 'markNote:treble',
-      note: noteCfg({ accidentals: true }),
+      note: noteCfg({ accidentalMode: 'note' }),
       rng: seeded(5),
     })
     const wrongSlot = q.validSlots![0] + 1

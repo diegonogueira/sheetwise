@@ -5,9 +5,10 @@ import type { TFunction } from 'i18next'
 import { Staff, type Mark } from './Staff/Staff'
 import { AlterPicker, NotePicker } from './NotePicker'
 import { taskOf } from '../core/module'
-import { diatonic, noteLabel, spelledAt, type Naming } from '../core/pitch'
+import { diatonic, noteLabel, spelledAt, type Alter, type Naming } from '../core/pitch'
 import { keyTonicLabel, type KeyMode, type KeySignature } from '../core/keys'
 import type { LedgerCount } from '../core/clef'
+import type { AccidentalMode } from '../core/exercise'
 import type { ExerciseApi } from '../hooks/useExercise'
 import { cx } from '../lib/cx'
 
@@ -50,7 +51,7 @@ interface BodyProps {
   naming: Naming
   ledgerBelow: LedgerCount
   ledgerAbove: LedgerCount
-  accidentals: boolean
+  accidentalMode: AccidentalMode
   slotHints: boolean
   compact: boolean
   nextButton: ReactNode
@@ -76,7 +77,9 @@ function ReadNoteBody(props: BodyProps) {
   const marks: Mark[] = [
     {
       slot: diatonic(note),
-      alter: note.alter,
+      // com armadura a nota é desenhada LIMPA: o acidente já está na clave, repeti-lo ao
+      // lado da nota entregaria a resposta (e não é como a partitura escreve)
+      alter: question.keySig ? 0 : note.alter,
       // ao acertar, a própria nota fica verde; ao errar ela continua em destaque, e o
       // texto abaixo é que diz qual era
       variant: correct ? 'correct' : 'accent',
@@ -91,19 +94,26 @@ function ReadNoteBody(props: BodyProps) {
         staves={question.staves}
         ledgerBelow={ledgerBelow}
         ledgerAbove={ledgerAbove}
+        keySig={question.keySig}
         marks={marks}
         width={staffWidth(compact)}
       />
       {!answered ? (
-        // O acidente da questão está DESENHADO na pauta: pedir que o aluno o repita num
-        // seletor não testa nada — ele só copiaria o que está vendo. Então as letras já vêm
-        // com ele (C♯ D♯ E♯…) e a resposta é só a letra, que é o que a pauta esconde.
-        <NotePicker
-          naming={naming}
-          alter={note.alter}
-          onPick={exercise.answerName}
-          compact={compact}
-        />
+        // Com armadura o acidente É a pergunta: ele não está ao lado da nota, sai da leitura
+        // da armadura, então o aluno o escolhe e as letras acompanham a escolha. Sem
+        // armadura o acidente está desenhado à vista, e repeti-lo num seletor só testaria
+        // cópia — aí as letras já vêm com ele e a resposta é só a letra.
+        <div className="flex w-full flex-col items-center gap-2">
+          {question.keySig && (
+            <AlterPicker alter={exercise.alter} onAlter={exercise.setAlter} compact={compact} />
+          )}
+          <NotePicker
+            naming={naming}
+            alter={question.keySig ? exercise.alter : note.alter}
+            onPick={exercise.answerName}
+            compact={compact}
+          />
+        </div>
       ) : (
         <Actions compact={compact} correct={correct} next={nextButton}>
           {correct
@@ -123,20 +133,26 @@ function ReadNoteBody(props: BodyProps) {
  * faixa desenhada (`validSlots`); ao errar, todas as posições certas aparecem como fantasmas.
  */
 function MarkNoteBody(props: BodyProps) {
-  const { exercise, naming, ledgerBelow, ledgerAbove, accidentals, slotHints, compact, nextButton } = props
+  const { exercise, naming, ledgerBelow, ledgerAbove, accidentalMode, slotHints, compact, nextButton } = props
   const { question, status, chosenSlot } = exercise
   const { t } = useTranslation()
   const answered = status !== 'idle'
   const correct = status === 'correct'
   const note = question.note!
 
+  // com armadura nada é desenhado ao lado da nota — o acidente já está na clave
+  const drawnAlter = (a: Alter): Alter => (question.keySig ? 0 : a)
   const marks: Mark[] = []
   if (chosenSlot !== null) {
-    marks.push({ slot: chosenSlot, alter: exercise.alter, variant: correct ? 'correct' : 'wrong' })
+    marks.push({
+      slot: chosenSlot,
+      alter: drawnAlter(exercise.chosenAlter ?? exercise.alter),
+      variant: correct ? 'correct' : 'wrong',
+    })
   }
   if (status === 'wrong') {
     for (const slot of question.validSlots ?? []) {
-      marks.push({ slot, alter: note.alter, variant: 'ghost' })
+      marks.push({ slot, alter: drawnAlter(note.alter), variant: 'ghost' })
     }
   }
 
@@ -149,13 +165,16 @@ function MarkNoteBody(props: BodyProps) {
           components={{ note: <span className="font-semibold text-accent" /> }}
         />
       </p>
-      {!answered && accidentals && (
+      {/* com armadura o acidente não é armado: quem altera a posição clicada é a própria
+          armadura desenhada, exatamente como na partitura */}
+      {!answered && accidentalMode === 'note' && (
         <AlterPicker alter={exercise.alter} onAlter={exercise.setAlter} compact={compact} />
       )}
       <Staff
         staves={question.staves}
         ledgerBelow={ledgerBelow}
         ledgerAbove={ledgerAbove}
+        keySig={question.keySig}
         marks={marks}
         onSelect={answered ? undefined : (slot) => exercise.answerSlot(slot)}
         hints={!answered && slotHints ? naming : null}
@@ -171,14 +190,14 @@ function MarkNoteBody(props: BodyProps) {
             ? t('exercise.markNote.correct', {
                 note:
                   chosenSlot !== null
-                    ? noteLabel(spelledAt(chosenSlot, exercise.alter), naming, true)
+                    ? noteLabel(spelledAt(chosenSlot, exercise.chosenAlter ?? 0), naming, true)
                     : noteLabel(note, naming),
               })
             : t('exercise.markNote.wrong', {
                 note: noteLabel(note, naming),
                 chosen:
                   chosenSlot !== null
-                    ? noteLabel(spelledAt(chosenSlot, exercise.alter), naming, true)
+                    ? noteLabel(spelledAt(chosenSlot, exercise.chosenAlter ?? 0), naming, true)
                     : '—',
               })}
         </Actions>

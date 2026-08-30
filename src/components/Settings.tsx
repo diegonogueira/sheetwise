@@ -6,7 +6,7 @@ import { Segmented } from './ui/Segmented'
 import { C_CLEF_LINES } from '../core/clefSet'
 import { isMarkNote, isNoteModule, usesCClef, type Module } from '../core/module'
 import { CLEF_IDS, LEDGER_COUNTS, type LedgerCount } from '../core/clef'
-import type { KeyAsk } from '../core/exercise'
+import type { AccidentalMode, KeyAsk } from '../core/exercise'
 import { cx } from '../lib/cx'
 
 function Row({ label, children }: { label: string; children: ReactNode }) {
@@ -48,11 +48,20 @@ function Chip({ on, onClick, children }: { on: boolean; onClick: () => void; chi
 // derivado de LEDGER_COUNTS: mexer no limite do núcleo já reflete aqui
 const LEDGER_OPTIONS = LEDGER_COUNTS.map((n) => ({ value: String(n), label: String(n) }))
 
+/** Teto de acidentes da armadura — o mesmo nos módulos de nota e no de tonalidade. */
+const KEY_MAX_OPTIONS = [
+  { value: '1', label: '1' },
+  { value: '2', label: '2' },
+  { value: '4', label: '4' },
+  { value: '7', label: '7' },
+]
+
 /** Config do módulo ativo: faixa lida e acidentes. */
 function ModuleSettings({ module }: { module: Module }) {
-  const { ledgerBelow, ledgerAbove, accidentals, slotHints } = useModuleConfig(module)
+  const { ledgerBelow, ledgerAbove, accidentalMode, keyMax, slotHints } = useModuleConfig(module)
   const setLedger = useSettings((s) => s.setLedger)
-  const setAccidentals = useSettings((s) => s.setAccidentals)
+  const setAccidentalMode = useSettings((s) => s.setAccidentalMode)
+  const setKeyMax = useSettings((s) => s.setKeyMax)
   const setSlotHints = useSettings((s) => s.setSlotHints)
   const { t } = useTranslation()
 
@@ -78,14 +87,26 @@ function ModuleSettings({ module }: { module: Module }) {
         <Row label={t('settings.accidentals')}>
           <Segmented
             size="sm"
-            value={accidentals ? 'on' : 'off'}
-            onChange={(v) => setAccidentals(module, v === 'on')}
+            value={accidentalMode}
+            onChange={(v) => setAccidentalMode(module, v as AccidentalMode)}
             options={[
-              { value: 'on', label: t('settings.yes') },
-              { value: 'off', label: t('settings.no') },
+              { value: 'none', label: t('settings.accidentalNone') },
+              { value: 'note', label: t('settings.accidentalNote') },
+              { value: 'key', label: t('settings.accidentalKey') },
             ]}
           />
         </Row>
+        {/* o limite da armadura só faz sentido quando é ELA que altera a nota */}
+        {accidentalMode === 'key' && (
+          <Row label={t('settings.keyMax')}>
+            <Segmented
+              size="sm"
+              value={String(keyMax)}
+              onChange={(v) => setKeyMax(module, Number(v))}
+              options={KEY_MAX_OPTIONS}
+            />
+          </Row>
+        )}
         {/* a ajuda das letras só existe onde se CLICA na pauta; na leitura ela entregaria
             a resposta antes da pergunta */}
         {isMarkNote(module) && (
@@ -156,11 +177,7 @@ function KeySettings() {
             size="sm"
             value={String(max)}
             onChange={(v) => setMax(Number(v))}
-            options={[
-              { value: '2', label: '2' },
-              { value: '4', label: '4' },
-              { value: '7', label: '7' },
-            ]}
+            options={KEY_MAX_OPTIONS}
           />
         </Row>
       </div>

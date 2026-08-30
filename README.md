@@ -9,9 +9,9 @@ App de treino de **leitura na pauta** nas claves de **Sol**, **Fá** e **Dó**. 
 Cada módulo é uma tarefa numa configuração de claves, com URL própria e configurações
 lembradas separadamente.
 
-**Ler notas** (pauta → nome) — uma nota acende na pauta e você diz qual é. O acidente não é
-perguntado: ele está desenhado ali, então as letras já vêm com ele (`C♯ D♯ E♯…`) e a resposta
-é a letra, que é o que a pauta esconde.
+**Ler notas** (pauta → nome) — uma nota acende na pauta e você diz qual é. Por padrão a pauta
+traz uma **armadura** e a nota vem limpa: quem diz que aquele Fá é Fá♯ é a armadura, então
+você escolhe o acidente e a letra — que é a leitura de verdade.
 **Marcar notas** (nome → pauta) — o enunciado pede uma nota e você clica na linha ou no
 espaço certo; vale qualquer oitava da faixa desenhada.
 
@@ -38,8 +38,9 @@ enunciado sempre diz qual das duas está pedindo.
 
 Nomes das notas em **C D E** ou **Dó Ré Mi** (é configuração, não idioma), som ligado ou
 desligado, e por módulo: quantas **linhas suplementares** entram na faixa (de 0 a 5 de cada
-lado), se as questões incluem **acidentes** (ligados por padrão), e — em "Marcar notas" — se as posições da pauta
-aparecem **rotuladas** como ajuda de leitura. A tonalidade tem ainda o modo perguntado
+lado), de onde vêm os **acidentes** (nenhum · desenhados na nota · impostos pela armadura,
+que é o padrão) e até quantos a armadura pode ter, e — em "Marcar notas" — se as posições da
+pauta aparecem **rotuladas** como ajuda de leitura. A tonalidade tem ainda o modo perguntado
 (maior/menor/os dois), o limite de acidentes e em quais claves a armadura é desenhada.
 
 Interface em português e inglês.

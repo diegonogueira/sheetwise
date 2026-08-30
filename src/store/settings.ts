@@ -4,7 +4,7 @@ import { useShallow } from 'zustand/react/shallow'
 import { MODULES, type Module } from '../core/module'
 import { DEFAULT_C_CLEF_LINES, type CClefLine } from '../core/clefSet'
 import type { ClefId, LedgerCount } from '../core/clef'
-import type { KeyAsk } from '../core/exercise'
+import type { AccidentalMode, KeyAsk } from '../core/exercise'
 import type { Naming } from '../core/pitch'
 
 /** Configs que cada módulo lembra separadamente. */
@@ -13,8 +13,10 @@ export interface ModuleConfig {
   ledgerBelow: LedgerCount
   /** linhas suplementares acima da pauta (ver `LEDGER_COUNTS`) */
   ledgerAbove: LedgerCount
-  /** inclui sustenidos e bemóis nas questões */
-  accidentals: boolean
+  /** de onde vem o acidente: nenhum, desenhado na nota, ou imposto pela armadura */
+  accidentalMode: AccidentalMode
+  /** no modo `key`: máximo de acidentes da armadura */
+  keyMax: number
   /** escreve a letra de cada posição na pauta (ajuda de leitura no "Marcar notas") */
   slotHints: boolean
 }
@@ -22,7 +24,8 @@ export interface ModuleConfig {
 const DEFAULT_MODULE_CONFIG: ModuleConfig = {
   ledgerBelow: 3,
   ledgerAbove: 3,
-  accidentals: true,
+  accidentalMode: 'key',
+  keyMax: 4,
   slotHints: false,
 }
 
@@ -64,7 +67,8 @@ interface SettingsState {
   setNaming: (v: Naming) => void
   setAudioEnabled: (v: boolean) => void
   setLedger: (module: Module, side: 'below' | 'above', v: LedgerCount) => void
-  setAccidentals: (module: Module, v: boolean) => void
+  setAccidentalMode: (module: Module, v: AccidentalMode) => void
+  setKeyMax: (module: Module, v: number) => void
   setSlotHints: (module: Module, v: boolean) => void
   toggleCClefLine: (line: CClefLine) => void
   setKeyAsk: (v: KeyAsk) => void
@@ -94,8 +98,10 @@ export const useSettings = create<SettingsState>()(
         set((s) => ({
           modules: patchModule(s.modules, module, side === 'below' ? { ledgerBelow: v } : { ledgerAbove: v }),
         })),
-      setAccidentals: (module, accidentals) =>
-        set((s) => ({ modules: patchModule(s.modules, module, { accidentals }) })),
+      setAccidentalMode: (module, accidentalMode) =>
+        set((s) => ({ modules: patchModule(s.modules, module, { accidentalMode }) })),
+      setKeyMax: (module, keyMax) =>
+        set((s) => ({ modules: patchModule(s.modules, module, { keyMax }) })),
       setSlotHints: (module, slotHints) =>
         set((s) => ({ modules: patchModule(s.modules, module, { slotHints }) })),
       toggleCClefLine: (line) => set((s) => ({ cClefLines: toggleKeepingOne(s.cClefLines, line) })),
@@ -105,20 +111,29 @@ export const useSettings = create<SettingsState>()(
     }),
     {
       name: 'sheetwise-settings',
-      version: 2,
+      version: 3,
       /**
-       * v1 gravava `accidentals: false` em cada módulo. Como o backfill da leitura só
-       * preenche campo AUSENTE (para não desfazer escolha de quem configurou), mudar o
-       * padrão não alcançaria quem já tinha aberto o app: os módulos continuariam só com
-       * notas naturais. A migração liga os acidentes em todos os módulos, uma vez.
+       * Migrações de PADRÃO (o backfill da leitura só preenche campo ausente, então mudar
+       * um default não alcança quem já abriu o app):
+       *
+       * - v2 ligou os acidentes em todos os módulos.
+       * - v3 troca o booleano `accidentals` pelo modo: quem os tinha ligados passa a ler
+       *   com ARMADURA (o acidente deixa de ser copiado da nota e passa a ser deduzido),
+       *   quem os tinha desligados continua só com naturais.
        */
       migrate: (persisted: unknown, version: number) => {
         const state = (persisted ?? {}) as Partial<SettingsState>
-        if (version >= 2) return state
-        const stored = state.modules
+        if (version >= 3) return state
+        const stored = state.modules as Record<Module, Partial<ModuleConfig> & { accidentals?: boolean }>
         const modules = modulesFrom(DEFAULT_MODULE_CONFIG)
         for (const m of MODULES) {
-          modules[m] = { ...DEFAULT_MODULE_CONFIG, ...stored?.[m], accidentals: true }
+          const old = stored?.[m]
+          const hadAccidentals = version >= 2 ? (old?.accidentals ?? true) : true
+          modules[m] = {
+            ...DEFAULT_MODULE_CONFIG,
+            ...old,
+            accidentalMode: hadAccidentals ? 'key' : 'none',
+          }
         }
         return { ...state, modules }
       },

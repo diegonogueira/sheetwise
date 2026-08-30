@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import {
   FLAT_ORDER,
+  alterInKey,
   KEY_SIGNATURES,
   SHARP_ORDER,
   keyTonicLabel,
@@ -10,6 +11,7 @@ import {
   toVexKeySignature,
   tonic,
 } from './keys'
+import { STEPS } from './pitch'
 import { midiOf } from './pitch'
 
 describe('catálogo de armaduras', () => {
@@ -89,5 +91,34 @@ describe('toVexKeySignature', () => {
     expect(toVexKeySignature(signatureByFifths(-2))).toBe('Bb')
     expect(toVexKeySignature(signatureByFifths(7))).toBe('C#')
     expect(toVexKeySignature(signatureByFifths(-7))).toBe('Cb')
+  })
+})
+
+describe('alterInKey', () => {
+  it('altera só os graus que a armadura escreve', () => {
+    const sol = signatureByFifths(1) // 1 sustenido: Fá♯
+    expect(alterInKey(3, sol)).toBe(1) // Fá
+    expect(alterInKey(0, sol)).toBe(0) // Dó
+    const fa = signatureByFifths(-1) // 1 bemol: Si♭
+    expect(alterInKey(6, fa)).toBe(-1) // Si
+    expect(alterInKey(2, fa)).toBe(0) // Mi
+  })
+
+  it('em Dó maior nenhum grau é alterado', () => {
+    for (const step of STEPS) expect(alterInKey(step, signatureByFifths(0))).toBe(0)
+  })
+
+  it('com 7 acidentes, TODOS os graus são alterados', () => {
+    for (const step of STEPS) {
+      expect(alterInKey(step, signatureByFifths(7))).toBe(1)
+      expect(alterInKey(step, signatureByFifths(-7))).toBe(-1)
+    }
+  })
+
+  it('bate com os graus que a armadura desenha', () => {
+    for (const sig of KEY_SIGNATURES) {
+      const alterados = STEPS.filter((s) => alterInKey(s, sig) !== 0)
+      expect(alterados.sort()).toEqual([...signatureSteps(sig)].sort())
+    }
   })
 })

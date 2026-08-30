@@ -31,6 +31,7 @@ import {
 } from './module'
 import { ALTERS, diatonic, spelledAt, type Alter, type Spelled } from './pitch'
 import {
+  alterInKey,
   signaturesUpTo,
   type KeyMode,
   type KeySignature,
@@ -41,12 +42,23 @@ export type Rng = () => number
 /** Modos que a tonalidade pode perguntar; `both` sorteia um a cada questão. */
 export type KeyAsk = KeyMode | 'both'
 
+/**
+ * De onde vem o acidente da nota.
+ *
+ * - `none` — só naturais, sem armadura.
+ * - `note` — o acidente é desenhado ao lado da nota; está à vista.
+ * - `key` — uma ARMADURA na clave, e a nota vem limpa: quem diz que aquele Fá é Fá♯ é a
+ *   armadura. É a leitura real, e a única em que o acidente é de fato perguntado.
+ */
+export type AccidentalMode = 'none' | 'note' | 'key'
+
 /** Configuração de um módulo de nota (leitura / marcação). */
 export interface NoteConfig {
   ledgerBelow: LedgerCount
   ledgerAbove: LedgerCount
-  /** inclui sustenidos e bemóis nas questões (senão, só notas naturais) */
-  accidentals: boolean
+  accidentalMode: AccidentalMode
+  /** no modo `key`: máximo de acidentes da armadura sorteada */
+  keyMax: number
   /** linhas ocupadas pela clave de Dó (só usado pelo conjunto `c`) */
   cClefLines: readonly CClefLine[]
 }
@@ -63,7 +75,8 @@ export interface KeyConfig {
 export const DEFAULT_NOTE_CONFIG: NoteConfig = {
   ledgerBelow: 3,
   ledgerAbove: 3,
-  accidentals: true,
+  accidentalMode: 'key',
+  keyMax: 4,
   cClefLines: DEFAULT_C_CLEF_LINES,
 }
 
@@ -83,7 +96,7 @@ export interface Question {
   note?: Spelled
   /** markNote: TODOS os diatônicos da faixa desenhada que valem como resposta */
   validSlots?: number[]
-  /** readKey: a armadura sorteada */
+  /** a armadura desenhada: sorteada em readKey, e no modo `key` dos módulos de nota */
   keySig?: KeySignature
   /** readKey: alternativas embaralhadas, todas do mesmo modo */
   keyChoices?: KeySignature[]
@@ -122,9 +135,9 @@ export function rangeFor(clef: ClefId, config: NoteConfig): { lo: number; hi: nu
   return staffRange(CLEF[clef], config.ledgerBelow, config.ledgerAbove)
 }
 
-/** Acidentes disponíveis conforme a config. */
+/** Acidentes que podem ser desenhados AO LADO da nota (só no modo `note`). */
 function altersFor(config: NoteConfig): readonly Alter[] {
-  return config.accidentals ? ALTERS : [0]
+  return config.accidentalMode === 'note' ? ALTERS : [0]
 }
 
 /**
@@ -138,7 +151,7 @@ function pickNote(
   module: Module,
   config: NoteConfig,
   rng: Rng,
-): { clef: ClefId; staves: ClefId[]; note: Spelled } {
+): { clef: ClefId; staves: ClefId[]; note: Spelled; keySig?: KeySignature } {
   const setId = clefSetOf(module)!
   const set = CLEF_SET[setId]
   const clefs = clefsForSet(set, config.cClefLines)
@@ -146,23 +159,39 @@ function pickNote(
   const staves = set.layout === 'grand' ? clefs : [clef]
   const { lo, hi } = rangeFor(clef, config)
   const d = lo + randInt(rng, hi - lo + 1)
+
+  // No modo `key` o acidente NÃO é sorteado: ele é consequência da armadura. A nota é
+  // desenhada limpa e a grafia certa sai da leitura da armadura — que é o exercício.
+  if (config.accidentalMode === 'key') {
+    const keySig = pick(signaturesUpTo(config.keyMax), rng)
+    const step = spelledAt(d).step
+    return { clef, staves, note: spelledAt(d, alterInKey(step, keySig)), keySig }
+  }
+
   const alter = pick(altersFor(config), rng)
   return { clef, staves, note: spelledAt(d, alter) }
 }
 
 function generateReadNote(module: Module, config: NoteConfig, rng: Rng): Question {
-  const { clef, staves, note } = pickNote(module, config, rng)
-  return { module, clef, staves, note }
+  const { clef, staves, note, keySig } = pickNote(module, config, rng)
+  return { module, clef, staves, note, keySig }
 }
 
 function generateMarkNote(module: Module, config: NoteConfig, rng: Rng): Question {
-  const { clef, staves, note } = pickNote(module, config, rng)
+  const { clef, staves, note, keySig } = pickNote(module, config, rng)
   // toda posição da(s) pauta(s) desenhada(s) com a mesma letra vale — o acidente vem do
   // seletor, não da posição vertical
   const validSlots = staves
     .flatMap((c) => slotsInRange(rangeFor(c, config)))
     .filter((d) => spelledAt(d).step === note.step)
-  return { module, clef, staves, note, validSlots: [...new Set(validSlots)].sort((a, b) => a - b) }
+  return {
+    module,
+    clef,
+    staves,
+    note,
+    keySig,
+    validSlots: [...new Set(validSlots)].sort((a, b) => a - b),
+  }
 }
 
 function generateReadKey(config: KeyConfig, rng: Rng): Question {

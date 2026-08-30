@@ -23,7 +23,7 @@ export default function App() {
   const keyAsk = useSettings((s) => s.keyAsk)
   const keyMaxAccidentals = useSettings((s) => s.keyMaxAccidentals)
   const keyClefs = useSettings((s) => s.keyClefs)
-  const { ledgerBelow, ledgerAbove, accidentals, slotHints } = useModuleConfig(module)
+  const { ledgerBelow, ledgerAbove, accidentalMode, keyMax, slotHints } = useModuleConfig(module)
   const [settingsOpen, setSettingsOpen] = useState(false)
   const [sidebarOpen, setSidebarOpen] = useState(false)
   // paisagem curta (celular deitado): layout compacto que cabe numa tela
@@ -31,8 +31,8 @@ export default function App() {
 
   // identidade estável: o exercício só regenera a questão quando a config muda de fato
   const noteCfg = useMemo<NoteConfig>(
-    () => ({ ledgerBelow, ledgerAbove, accidentals, cClefLines }),
-    [ledgerBelow, ledgerAbove, accidentals, cClefLines],
+    () => ({ ledgerBelow, ledgerAbove, accidentalMode, keyMax, cClefLines }),
+    [ledgerBelow, ledgerAbove, accidentalMode, keyMax, cClefLines],
   )
   const keyCfg = useMemo<KeyConfig>(
     () => ({ ask: keyAsk, maxAccidentals: keyMaxAccidentals, clefs: keyClefs }),
@@ -119,7 +119,7 @@ export default function App() {
             naming={naming}
             ledgerBelow={ledgerBelow}
             ledgerAbove={ledgerAbove}
-            accidentals={accidentals}
+            accidentalMode={accidentalMode}
             slotHints={slotHints}
             compact={compact}
           />

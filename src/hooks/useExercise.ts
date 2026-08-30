@@ -9,7 +9,7 @@ import {
   type Question,
 } from '../core/exercise'
 import type { Module } from '../core/module'
-import type { KeySignature } from '../core/keys'
+import { alterInKey, type KeySignature } from '../core/keys'
 import { midiOf, spelledAt, type Alter, type Spelled } from '../core/pitch'
 
 export type Status = 'idle' | 'correct' | 'wrong'
@@ -31,6 +31,8 @@ export interface ExerciseApi {
   chosenNote: Spelled | null
   /** markNote: posição clicada na pauta */
   chosenSlot: number | null
+  /** markNote: acidente que valeu no clique (armado pelo aluno, ou imposto pela armadura) */
+  chosenAlter: Alter | null
   /** markNote: acidente armado no seletor (aplicado ao clicar) */
   alter: Alter
   /** readKey: armadura escolhida */
@@ -47,6 +49,7 @@ export function useExercise({ module, note, key, onReveal }: UseExerciseArgs): E
   const [status, setStatus] = useState<Status>('idle')
   const [chosenNote, setChosenNote] = useState<Spelled | null>(null)
   const [chosenSlot, setChosenSlot] = useState<number | null>(null)
+  const [chosenAlter, setChosenAlter] = useState<Alter | null>(null)
   const [chosenKey, setChosenKey] = useState<KeySignature | null>(null)
   const [alter, setAlter] = useState<Alter>(0)
 
@@ -55,6 +58,7 @@ export function useExercise({ module, note, key, onReveal }: UseExerciseArgs): E
     setStatus('idle')
     setChosenNote(null)
     setChosenSlot(null)
+    setChosenAlter(null)
     setChosenKey(null)
     setAlter(0)
   }, [module, note, key])
@@ -74,10 +78,16 @@ export function useExercise({ module, note, key, onReveal }: UseExerciseArgs): E
   const answerSlot = useCallback(
     (slot: number) => {
       if (status !== 'idle') return
+      // Com armadura o acidente não é armado pelo aluno: quem altera aquela posição é a
+      // armadura desenhada. É a mesma regra da partitura — o Fá da linha vira Fá♯ sozinho.
+      const effective: Alter = question.keySig
+        ? alterInKey(spelledAt(slot).step, question.keySig)
+        : alter
       setChosenSlot(slot)
-      setStatus(checkSlot(question, slot, alter) ? 'correct' : 'wrong')
+      setChosenAlter(effective)
+      setStatus(checkSlot(question, slot, effective) ? 'correct' : 'wrong')
       // soa o que o aluno DE FATO marcou, não a resposta — é o retorno honesto do clique
-      onReveal?.(midiOf(spelledAt(slot, alter)))
+      onReveal?.(midiOf(spelledAt(slot, effective)))
     },
     [status, question, alter, onReveal],
   )
@@ -110,6 +120,7 @@ export function useExercise({ module, note, key, onReveal }: UseExerciseArgs): E
     status,
     chosenNote,
     chosenSlot,
+    chosenAlter,
     chosenKey,
     alter,
     setAlter,

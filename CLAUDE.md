@@ -82,10 +82,25 @@ the new entries wherever a `Record<Module, …>` is used. The menu (`Sidebar.tsx
 
 - **readNote** — octave-agnostic: the spelling (letter + accidental) must match, in any
   octave. The student picks from all 7 letters — recall, not multiple choice, so there is no
-  `choices` field. The **accidental is not asked**: it is drawn on the staff, so making the
-  student re-enter it in a selector would only test copying. The buttons carry the question's
-  accidental instead (`C♯ D♯ E♯…`), and the answer is the letter, which is what the staff
-  actually hides.
+  `choices` field. Whether the **accidental is asked** depends on `accidentalMode` (below):
+  with a key signature it is the point of the question, so the ♭/♮/♯ selector is shown and
+  the letters follow it; without one the accidental is drawn next to the note, so asking for
+  it would only test copying and the letters carry it instead (`C♯ D♯ E♯…`).
+### `accidentalMode`: where the accidental comes from
+
+`none` (only naturals) · `note` (drawn beside the notehead) · `key` (**the default**: a key
+signature at the clef, and the note is drawn *clean*).
+
+In `key` mode the note's `alter` is not random — it is `alterInKey(step, keySig)`, exactly
+what the signature imposes. Two consequences the UI must respect, or the exercise gives
+itself away:
+
+- the mark is drawn with **`alter: 0`** — repeating the accidental next to the notehead is
+  both wrong notation and the answer handed over;
+- in markNote the student does **not** arm the accidental: `answerSlot` derives it from the
+  signature (`useExercise`), the same way the page does. Clicking the F line in D major is
+  answering F♯.
+
 - **markNote** — any drawn position spelling that note counts. `question.validSlots` is the
   **single source of truth**; on a wrong answer every valid slot is revealed as a `ghost`.
   The success message names **what the student clicked**, not the octave the generator
@@ -97,13 +112,14 @@ the new entries wherever a `Record<Module, …>` is used. The menu (`Sidebar.tsx
 ## State is split in two
 
 - **`useSettings`** (`src/store/settings.ts`, zustand + `persist`, key `sheetwise-settings`,
-  currently **version 2**): what the user chose. Adding a top-level field is safe. Adding a
+  currently **version 3**): what the user chose. Adding a top-level field is safe. Adding a
   `ModuleConfig` field is safe too — `useModuleConfig` backfills missing fields from
   `DEFAULT_MODULE_CONFIG` on **read**, so persisted states never need a migration for a new
   option. Renaming or removing a field **does** need a `version` bump plus a `migrate`.
   So does *changing a default*: the backfill only fills what is **absent**, so a value
-  already written keeps winning (v2 exists for exactly that — it turned `accidentals` on
-  everywhere). Only migrate a default when the intent is to override past choices.
+  already written keeps winning (v2 exists for exactly that — it turned accidentals on
+  everywhere; v3 replaced the `accidentals` boolean with `accidentalMode`). Only migrate a
+  default when the intent is to override past choices.
 - **`useExercise`** (`src/hooks/useExercise.ts`): the current question and answer. Per
   session, reset on every `next()` and on every module or config change. That reset happens
   **during render** (React's "adjust state when a prop changes"), never in an effect: an

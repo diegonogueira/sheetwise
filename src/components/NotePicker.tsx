@@ -23,7 +23,20 @@ interface NotePickerProps {
 
 const ALTERS: Alter[] = [-1, 0, 1]
 
-export function AlterPicker({ alter, onAlter }: { alter: Alter; onAlter: (a: Alter) => void }) {
+/**
+ * ♭ ♮ ♯ são glifos musicais: no mesmo corpo de fonte das letras eles saem bem menores
+ * (têm muito espaço em branco em volta) e viram um alvo pequeno demais no celular. Daí o
+ * corpo maior e a largura folgada — o botão fica com ~44px, o mínimo de toque confortável.
+ */
+export function AlterPicker({
+  alter,
+  onAlter,
+  compact = false,
+}: {
+  alter: Alter
+  onAlter: (a: Alter) => void
+  compact?: boolean
+}) {
   return (
     <div className="inline-flex rounded-xl bg-line p-0.5">
       {ALTERS.map((a) => (
@@ -33,7 +46,8 @@ export function AlterPicker({ alter, onAlter }: { alter: Alter; onAlter: (a: Alt
           onClick={() => onAlter(a)}
           aria-pressed={alter === a}
           className={cx(
-            'w-9 rounded-lg py-1 text-sm transition-colors',
+            'rounded-lg leading-none transition-colors',
+            compact ? 'w-11 py-1.5 text-xl' : 'w-14 py-2.5 text-2xl',
             alter === a ? 'bg-surface font-semibold text-ink shadow-sm' : 'text-muted hover:text-ink',
           )}
         >
@@ -56,7 +70,7 @@ export function NotePicker({
   useTranslation() // re-renderiza ao trocar de idioma (os rótulos vêm do núcleo)
   return (
     <div className="flex w-full flex-col items-center gap-2">
-      {accidentals && <AlterPicker alter={alter} onAlter={onAlter} />}
+      {accidentals && <AlterPicker alter={alter} onAlter={onAlter} compact={compact} />}
       {onPick && (
         <div className={cx('grid w-full gap-1.5', compact ? 'grid-cols-7' : 'grid-cols-4 sm:grid-cols-7')}>
           {steps.map((step) => (

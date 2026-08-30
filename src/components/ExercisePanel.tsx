@@ -149,7 +149,7 @@ function MarkNoteBody(props: BodyProps) {
         />
       </p>
       {!answered && accidentals && (
-        <AlterPicker alter={exercise.alter} onAlter={exercise.setAlter} />
+        <AlterPicker alter={exercise.alter} onAlter={exercise.setAlter} compact={compact} />
       )}
       <Staff
         staves={question.staves}

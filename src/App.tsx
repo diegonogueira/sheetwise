@@ -96,9 +96,12 @@ export default function App() {
           onClose={() => setSidebarOpen(false)}
         />
 
+        {/* o exercício fica centrado na altura livre: encostado no topo, sobrava metade da
+            tela do celular vazia embaixo. `justify-center-safe` centraliza SEM cortar o
+            topo quando a pauta cresce (faixa larga, sistema de piano) e passa a rolar. */}
         <main
           className={cx(
-            'mx-auto flex w-full max-w-3xl flex-1 flex-col px-4',
+            'mx-auto flex w-full max-w-3xl flex-1 flex-col justify-center-safe px-4',
             compact ? 'min-h-0 gap-2 overflow-y-auto py-2' : 'gap-4 py-5',
           )}
         >

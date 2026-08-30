@@ -46,8 +46,10 @@ export function AlterPicker({
           onClick={() => onAlter(a)}
           aria-pressed={alter === a}
           className={cx(
-            'rounded-lg leading-none transition-colors',
-            compact ? 'w-11 py-1.5 text-xl' : 'w-14 py-2.5 text-2xl',
+            // flex + altura fixa em vez de padding: cada glifo (♭ tem haste, ♯ é simétrico,
+            // ♮ é alto) tem métrica própria, e só o centro da CAIXA os alinha entre si
+            'flex items-center justify-center rounded-lg leading-none transition-colors',
+            compact ? 'h-8 w-11 text-xl' : 'h-11 w-14 text-2xl',
             alter === a ? 'bg-surface font-semibold text-ink shadow-sm' : 'text-muted hover:text-ink',
           )}
         >

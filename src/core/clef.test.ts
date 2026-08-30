@@ -2,12 +2,12 @@ import { describe, expect, it } from 'vitest'
 import {
   CLEF,
   CLEF_IDS,
+  LEDGER_COUNTS,
   diatonicForY,
   slotsInRange,
   staffRange,
   topLine,
   yForDiatonic,
-  type LedgerCount,
 } from './clef'
 import { noteLabel, spelledAt } from './pitch'
 
@@ -66,7 +66,7 @@ describe('staffRange', () => {
 
   it('a faixa nunca fica vazia e cresce com as linhas', () => {
     for (const id of CLEF_IDS) {
-      for (const n of [0, 1, 2] as LedgerCount[]) {
+      for (const n of LEDGER_COUNTS) {
         const slots = slotsInRange(staffRange(CLEF[id], n, n))
         expect(slots.length).toBe(11 + 4 * n)
       }

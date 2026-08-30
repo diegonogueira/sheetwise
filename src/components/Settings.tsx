@@ -5,7 +5,7 @@ import { useSettings, useModuleConfig } from '../store/settings'
 import { Segmented } from './ui/Segmented'
 import { C_CLEF_LINES } from '../core/clefSet'
 import { isMarkNote, isNoteModule, usesCClef, type Module } from '../core/module'
-import { CLEF_IDS, type LedgerCount } from '../core/clef'
+import { CLEF_IDS, LEDGER_COUNTS, type LedgerCount } from '../core/clef'
 import type { KeyAsk } from '../core/exercise'
 import { cx } from '../lib/cx'
 
@@ -45,11 +45,8 @@ function Chip({ on, onClick, children }: { on: boolean; onClick: () => void; chi
   )
 }
 
-const LEDGER_OPTIONS = [
-  { value: '0', label: '0' },
-  { value: '1', label: '1' },
-  { value: '2', label: '2' },
-]
+// derivado de LEDGER_COUNTS: mexer no limite do núcleo já reflete aqui
+const LEDGER_OPTIONS = LEDGER_COUNTS.map((n) => ({ value: String(n), label: String(n) }))
 
 /** Config do módulo ativo: faixa lida e acidentes. */
 function ModuleSettings({ module }: { module: Module }) {

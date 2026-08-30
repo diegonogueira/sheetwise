@@ -35,8 +35,8 @@ enunciado sempre diz qual das duas está pedindo.
 ## Configurações
 
 Nomes das notas em **C D E** ou **Dó Ré Mi** (é configuração, não idioma), som ligado ou
-desligado, e por módulo: quantas **linhas suplementares** entram na faixa (0, 1 ou 2 de cada
-lado), se as questões incluem **acidentes**, e — em "Marcar notas" — se as posições da pauta
+desligado, e por módulo: quantas **linhas suplementares** entram na faixa (de 0 a 5 de cada
+lado), se as questões incluem **acidentes** (ligados por padrão), e — em "Marcar notas" — se as posições da pauta
 aparecem **rotuladas** como ajuda de leitura. A tonalidade tem ainda o modo perguntado
 (maior/menor/os dois), o limite de acidentes e em quais claves a armadura é desenhada.
 

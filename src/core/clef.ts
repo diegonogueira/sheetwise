@@ -55,8 +55,13 @@ export function topLine(clef: Clef): number {
   return clef.bottomLine + 8
 }
 
-/** Quantas linhas suplementares mostrar de cada lado da pauta. */
-export type LedgerCount = 0 | 1 | 2
+/**
+ * Quantas linhas suplementares mostrar de cada lado da pauta. Vai até 5 porque a literatura
+ * vai: o dó agudo do piano fica a 5 linhas acima da clave de Sol. Quem está começando
+ * deixa em 1; quem prepara uma peça abre a faixa.
+ */
+export const LEDGER_COUNTS = [0, 1, 2, 3, 4, 5] as const
+export type LedgerCount = (typeof LEDGER_COUNTS)[number]
 
 /**
  * Faixa de leitura (diatônicos, inclusiva). Com 0 linhas suplementares já entram o espaço

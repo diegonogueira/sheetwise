@@ -90,7 +90,11 @@ describe('readNote', () => {
 
   it('sem acidentes na config só sorteia notas naturais', () => {
     for (const seed of SEEDS) {
-      const q = generateQuestion({ module: 'readNote:treble', note: noteCfg(), rng: seeded(seed) })
+      const q = generateQuestion({
+        module: 'readNote:treble',
+        note: noteCfg({ accidentals: false }),
+        rng: seeded(seed),
+      })
       expect(q.note!.alter).toBe(0)
     }
   })

@@ -63,7 +63,7 @@ export interface KeyConfig {
 export const DEFAULT_NOTE_CONFIG: NoteConfig = {
   ledgerBelow: 1,
   ledgerAbove: 1,
-  accidentals: false,
+  accidentals: true,
   cClefLines: DEFAULT_C_CLEF_LINES,
 }
 

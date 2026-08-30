@@ -4,6 +4,7 @@ import {
   CLEF_IDS,
   LEDGER_COUNTS,
   diatonicForY,
+  ledgerLinesFor,
   slotsInRange,
   staffRange,
   topLine,
@@ -69,6 +70,38 @@ describe('staffRange', () => {
       for (const n of LEDGER_COUNTS) {
         const slots = slotsInRange(staffRange(CLEF[id], n, n))
         expect(slots.length).toBe(11 + 4 * n)
+      }
+    }
+  })
+})
+
+describe('ledgerLinesFor', () => {
+  const treble = CLEF.treble // linha de baixo Mi4 (30), linha de cima Fá5 (38)
+
+  it('o espaço colado na pauta não pede linha nenhuma', () => {
+    expect(ledgerLinesFor(29, treble)).toEqual([]) // Ré4, logo abaixo
+    expect(ledgerLinesFor(39, treble)).toEqual([]) // Sol5, logo acima
+  })
+
+  it('a nota SOBRE a suplementar pede aquela linha', () => {
+    expect(ledgerLinesFor(28, treble)).toEqual([28]) // Dó4
+    expect(ledgerLinesFor(40, treble)).toEqual([40]) // Lá5
+  })
+
+  it('a nota no espaço além da suplementar ainda se apoia nela', () => {
+    expect(ledgerLinesFor(27, treble)).toEqual([28]) // Si3
+    expect(ledgerLinesFor(41, treble)).toEqual([40]) // Si5
+  })
+
+  it('acumula as linhas do caminho todo, da pauta até a nota', () => {
+    expect(ledgerLinesFor(24, treble)).toEqual([28, 26, 24]) // Fá3
+    expect(ledgerLinesFor(44, treble)).toEqual([40, 42, 44]) // Mi6
+  })
+
+  it('nenhuma posição da pauta pede linha suplementar', () => {
+    for (const id of CLEF_IDS) {
+      for (const d of slotsInRange(staffRange(CLEF[id], 0, 0))) {
+        expect(ledgerLinesFor(d, CLEF[id])).toEqual([])
       }
     }
   })

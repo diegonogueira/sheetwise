@@ -2,6 +2,7 @@ import { useLayoutEffect, useRef } from 'react'
 import { Accidental, Formatter, Renderer, Stave, StaveConnector, StaveNote, Voice } from 'vexflow'
 import {
   CLEF,
+  ledgerLinesFor,
   slotsInRange,
   staffRange,
   yForDiatonic,
@@ -58,6 +59,9 @@ const CLEF_OVERHANG = 20
  */
 const NOTE_MARGIN_SPACES = 2
 const noteMargin = (spacing: number) => NOTE_MARGIN_SPACES * spacing
+/** Largura da linha suplementar de pré-visualização, em espaços de pauta (a do VexFlow
+ *  passa um pouco de cada lado da cabeça da nota). */
+const LEDGER_PREVIEW_SPACES = 2.4
 
 interface StaffProps {
   /** claves desenhadas, do grave ao agudo (uma só, ou as duas do sistema de piano) */
@@ -261,6 +265,32 @@ export function Staff({
             rect.setAttribute('data-slot', String(slot))
             rect.setAttribute('data-clef', clefId)
             layer.appendChild(rect)
+
+            // Pré-visualização das linhas suplementares. Fora da pauta o realce sozinho é
+            // uma barra no vazio: não dá para saber se aquilo é linha ou espaço, nem a que
+            // distância da pauta está. Desenhar as suplementares do caminho (como a partitura
+            // faria com a nota escrita ali) devolve a referência. Vem logo DEPOIS do alvo
+            // porque o CSS a acende com `.staff-slot:hover + .staff-ledger-preview`.
+            const ledgers = ledgerLinesFor(slot, clef)
+            if (ledgers.length) {
+              const preview = document.createElementNS('http://www.w3.org/2000/svg', 'g')
+              preview.setAttribute('class', 'staff-ledger-preview')
+              const half = (LEDGER_PREVIEW_SPACES * spacing) / 2
+              const cx = x + w / 2
+              for (const d of ledgers) {
+                const ly = yForDiatonic(d, clef, topLineY, spacing)
+                const line = document.createElementNS('http://www.w3.org/2000/svg', 'line')
+                line.setAttribute('x1', String(cx - half))
+                line.setAttribute('x2', String(cx + half))
+                line.setAttribute('y1', String(ly))
+                line.setAttribute('y2', String(ly))
+                // a linha da posição apontada vem realçada: é o que diz "aqui é LINHA",
+                // e não o espaço logo acima ou abaixo dela
+                if (d === slot) line.setAttribute('class', 'is-slot')
+                preview.appendChild(line)
+              }
+              layer.appendChild(preview)
+            }
 
             if (hints) {
               // a letra vai na coluna reservada à ESQUERDA da pauta (`HINT_GUTTER`): dentro

@@ -124,18 +124,30 @@ The `.staff-slot` click targets live **inside the VexFlow SVG**, which sets a st
 parent group — `stroke: none` in the CSS is load-bearing, not decoration. Same for
 `.staff-hint`.
 
+`.staff-ledger-preview` (the ledger lines that light up under the hovered slot) is shown by
+`.staff-slot:hover + .staff-ledger-preview`, an **adjacent sibling** selector: the `<g>` must
+be inserted immediately after its own `rect` in `Staff.tsx`. Putting anything between them —
+the hint label, for instance — silently breaks the hover.
+
 ## The Staff component
 
 `src/components/Staff/Staff.tsx` draws with VexFlow and then does two things by hand:
 
 1. **Centers the notes.** The formatter left-aligns, which would glue the note to the clef.
    The shift is computed from the notes' bounding box (position **plus width**) and clamped
-   to the note area, so a row of revealed ghosts never spills past the barline.
+   to the note area, so a row of revealed ghosts never spills past the barline. The shift is
+   applied to the **`TickContext`**, never with `setXShift`: a note's `x_shift` belongs to
+   VexFlow, which uses it to open room for the accidental, and overwriting it moved only the
+   notehead — the accidental reads the absolute X (from the tick context) and stayed parked
+   next to the clef.
 2. **Crops the canvas.** VexFlow is given a generous canvas, then the `viewBox` is narrowed
    to the vertical extent the module actually uses. That extent comes from the configured
    **range**, not from the drawn note, so the staff does not jump between questions.
    VexFlow writes the original height into an inline `style`, which beats the `height`
    attribute — `svgEl.style.height` must be set too or the content ends up letterboxed.
+   The margin around that extent is measured in **staff spaces**, not pixels: a ♭ reaches
+   about a space and a half above the notehead, so a fixed margin clipped the accidental of
+   the highest note in the range.
 
 ## Verifying UI changes
 

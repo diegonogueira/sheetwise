@@ -58,6 +58,26 @@ body {
   fill: color-mix(in srgb, var(--color-accent) 14%, transparent);
 }
 
+/* As suplementares que a posição apontada exigiria, acesas junto com o realce: fora da
+   pauta, o realce sozinho não diz se ali é linha ou espaço. O seletor de irmão adjacente
+   é o que amarra cada grupo ao seu alvo — por isso o `<g>` é inserido logo depois do
+   `rect` no Staff. */
+.staff-ledger-preview {
+  opacity: 0;
+  pointer-events: none;
+}
+.staff-slot:hover + .staff-ledger-preview {
+  opacity: 1;
+}
+.staff-ledger-preview line {
+  stroke: var(--color-faint);
+  stroke-width: 1.5;
+}
+.staff-ledger-preview line.is-slot {
+  stroke: var(--color-accent);
+  stroke-width: 1.5;
+}
+
 /* a pauta é desenhada em pixels naturais; a caixa se ajusta ao conteúdo */
 .staff svg {
   display: block;

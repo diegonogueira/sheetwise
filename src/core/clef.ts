@@ -79,6 +79,19 @@ export function staffRange(
   }
 }
 
+/**
+ * As linhas suplementares que uma posição exige: todas as que ficam ENTRE a pauta e a nota,
+ * incluindo a própria posição quando ela é uma linha. O espaço logo acima (ou abaixo) da
+ * pauta não pede nenhuma; o espaço acima da 1ª suplementar já pede aquela linha, porque a
+ * nota se apoia nela.
+ */
+export function ledgerLinesFor(d: number, clef: Clef): number[] {
+  const out: number[] = []
+  for (let x = topLine(clef) + 2; x <= d; x += 2) out.push(x)
+  for (let x = clef.bottomLine - 2; x >= d; x -= 2) out.push(x)
+  return out
+}
+
 /** Todos os diatônicos da faixa, do grave ao agudo. */
 export function slotsInRange(range: { lo: number; hi: number }): number[] {
   const out: number[] = []

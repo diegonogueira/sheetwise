@@ -9,7 +9,9 @@ App de treino de **leitura na pauta** nas claves de **Sol**, **Fá** e **Dó**. 
 Cada módulo é uma tarefa numa configuração de claves, com URL própria e configurações
 lembradas separadamente.
 
-**Ler notas** (pauta → nome) — uma nota acende na pauta e você diz qual é.
+**Ler notas** (pauta → nome) — uma nota acende na pauta e você diz qual é. O acidente não é
+perguntado: ele está desenhado ali, então as letras já vêm com ele (`C♯ D♯ E♯…`) e a resposta
+é a letra, que é o que a pauta esconde.
 **Marcar notas** (nome → pauta) — o enunciado pede uma nota e você clica na linha ou no
 espaço certo; vale qualquer oitava da faixa desenhada.
 
@@ -89,7 +91,7 @@ src/
   components/
     Staff/         a pauta (VexFlow) + as posições clicáveis
     ExercisePanel  enunciado, resposta e feedback de cada tarefa
-    NotePicker     seleção de letra e de acidente
+    NotePicker     as 7 letras, com o acidente da questão estampado
     Sidebar, TopBar, Settings, ui/Segmented
   hooks/         useExercise (sessão), useRoute (URL), useMediaQuery
   store/         configurações persistidas

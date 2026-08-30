@@ -81,8 +81,11 @@ the new entries wherever a `Record<Module, …>` is used. The menu (`Sidebar.tsx
 ### How each task validates
 
 - **readNote** — octave-agnostic: the spelling (letter + accidental) must match, in any
-  octave. The student names the note from all 7 letters (plus a ♭/♮/♯ selector when
-  accidentals are on) — it is recall, not multiple choice, so there is no `choices` field.
+  octave. The student picks from all 7 letters — recall, not multiple choice, so there is no
+  `choices` field. The **accidental is not asked**: it is drawn on the staff, so making the
+  student re-enter it in a selector would only test copying. The buttons carry the question's
+  accidental instead (`C♯ D♯ E♯…`), and the answer is the letter, which is what the staff
+  actually hides.
 - **markNote** — any drawn position spelling that note counts. `question.validSlots` is the
   **single source of truth**; on a wrong answer every valid slot is revealed as a `ghost`.
   The success message names **what the student clicked**, not the octave the generator

@@ -66,7 +66,7 @@ function staffWidth(compact: boolean): number {
  * resposta (entregaria o exercício) — "mostrar o nome" só vale depois, na revelação.
  */
 function ReadNoteBody(props: BodyProps) {
-  const { exercise, naming, ledgerBelow, ledgerAbove, accidentals, compact, nextButton } = props
+  const { exercise, naming, ledgerBelow, ledgerAbove, compact, nextButton } = props
   const { question, status, chosenNote } = exercise
   const { t } = useTranslation()
   const answered = status !== 'idle'
@@ -95,11 +95,12 @@ function ReadNoteBody(props: BodyProps) {
         width={staffWidth(compact)}
       />
       {!answered ? (
+        // O acidente da questão está DESENHADO na pauta: pedir que o aluno o repita num
+        // seletor não testa nada — ele só copiaria o que está vendo. Então as letras já vêm
+        // com ele (C♯ D♯ E♯…) e a resposta é só a letra, que é o que a pauta esconde.
         <NotePicker
           naming={naming}
-          alter={exercise.alter}
-          onAlter={exercise.setAlter}
-          accidentals={accidentals}
+          alter={note.alter}
           onPick={exercise.answerName}
           compact={compact}
         />

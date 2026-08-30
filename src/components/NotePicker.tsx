@@ -4,19 +4,15 @@ import { AccidentalGlyph } from './Staff/AccidentalGlyph'
 import { cx } from '../lib/cx'
 
 /**
- * Escolha de nota: uma linha de 7 letras e, quando os acidentes estão ligados, uma linha
- * ♭ ♮ ♯ antes. Duas linhas em vez de 21 botões — e o mesmo seletor de acidente serve para
- * armar o acidente antes de clicar na pauta, no módulo "Marcar notas".
+ * Escolha de nota: as 7 letras, já com o acidente da questão estampado (C♯ D♯ E♯…). São 7
+ * botões em vez de 21, e o aluno responde o que a pauta esconde — a letra —, não o acidente,
+ * que está desenhado ali na frente dele.
  */
 interface NotePickerProps {
   naming: Naming
-  /** acidente armado */
+  /** acidente da questão: entra no rótulo e na resposta */
   alter: Alter
-  onAlter: (a: Alter) => void
-  /** mostra a linha de acidentes */
-  accidentals: boolean
-  /** clicar numa letra; ausente quando só o seletor de acidente é usado (markNote) */
-  onPick?: (note: Spelled) => void
+  onPick: (note: Spelled) => void
   /** letras a oferecer; padrão: as 7 */
   steps?: readonly Spelled['step'][]
   compact?: boolean
@@ -59,34 +55,21 @@ export function AlterPicker({
   )
 }
 
-export function NotePicker({
-  naming,
-  alter,
-  onAlter,
-  accidentals,
-  onPick,
-  steps = STEPS,
-  compact = false,
-}: NotePickerProps) {
+export function NotePicker({ naming, alter, onPick, steps = STEPS, compact = false }: NotePickerProps) {
   useTranslation() // re-renderiza ao trocar de idioma (os rótulos vêm do núcleo)
   return (
-    <div className="flex w-full flex-col items-center gap-2">
-      {accidentals && <AlterPicker alter={alter} onAlter={onAlter} compact={compact} />}
-      {onPick && (
-        <div className={cx('grid w-full gap-1.5', compact ? 'grid-cols-7' : 'grid-cols-4 sm:grid-cols-7')}>
-          {steps.map((step) => (
-            <button
-              key={step}
-              type="button"
-              onClick={() => onPick({ step, alter, octave: 4 })}
-              className="rounded-xl border border-line bg-surface px-1 py-2.5 text-sm font-semibold text-ink transition-colors hover:border-accent hover:bg-accent-soft"
-            >
-              {stepLabel(step, naming)}
-              {ALTER_SYMBOL[alter]}
-            </button>
-          ))}
-        </div>
-      )}
+    <div className={cx('grid w-full gap-1.5', compact ? 'grid-cols-7' : 'grid-cols-4 sm:grid-cols-7')}>
+      {steps.map((step) => (
+        <button
+          key={step}
+          type="button"
+          onClick={() => onPick({ step, alter, octave: 4 })}
+          className="rounded-xl border border-line bg-surface px-1 py-2.5 text-sm font-semibold text-ink transition-colors hover:border-accent hover:bg-accent-soft"
+        >
+          {stepLabel(step, naming)}
+          {ALTER_SYMBOL[alter]}
+        </button>
+      ))}
     </div>
   )
 }

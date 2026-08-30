@@ -1,0 +1,35 @@
+#!/usr/bin/env bash
+#
+# Deploy do Sheetwise no homelab: baixa o código novo da main e sobe o
+# container já com esse build.
+#
+#   1. fast-forward da main (git pull --ff-only) — falha em vez de criar merge
+#      commit se a main divergir; a máquina de deploy nunca edita código.
+#   2. rebuilda a imagem e recria o container (docker compose up -d --build).
+#   3. remove imagens órfãs deixadas pelo build anterior.
+#
+# Uso: ./bin/deploy
+#
+set -euo pipefail
+
+cd "$(dirname "$0")/.."
+
+# garante que está na main
+branch=$(git rev-parse --abbrev-ref HEAD)
+if [ "$branch" != "main" ]; then
+  echo "⚠  não está na main (está em '$branch'). Trocando para main…"
+  git checkout main
+fi
+
+echo "→ baixando código novo (fast-forward da main)…"
+git pull --ff-only
+
+echo "→ rebuildando a imagem e subindo o container…"
+docker compose up -d --build
+
+echo "→ limpando imagens órfãs do build anterior…"
+docker image prune -f >/dev/null
+
+echo
+echo "✓ deploy concluído:"
+docker compose ps

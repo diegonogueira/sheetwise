@@ -1,0 +1,79 @@
+#!/usr/bin/env bash
+#
+# CLI de tickets: atalhos pro fluxo de issues do GitHub.
+# Roda onde você estiver: na main, em detached HEAD ou numa worktree sua. O
+# /start-ticket cria a branch `issue-N` na pasta atual quando precisa; worktree
+# dedicada é opcional (use se quiser rodar várias frentes em paralelo).
+#
+# Uso:
+#   ticket list [args...]   Lista os issues abertos (repassa flags pro `gh issue list`).
+#   ticket start <numero>   Abre uma sessão Claude pro issue (/start-ticket) NA PASTA ATUAL.
+#   ticket <numero>         Atalho pra `ticket start <numero>`.
+#   ticket finish           Aprova o trabalho atual (/finish-ticket): roda os gates,
+#                           mergeia na main por fast-forward, sobe e limpa a branch
+#                           (e a worktree, se for dedicada).
+#
+# Fluxo simples (in-place, na pasta atual):
+#   ./ticket start 12                # cria issue-12 a partir do origin/main aqui mesmo
+#   # ...implementa, revisa o draft PR, aprova...
+#   ./ticket finish                  # faz ff na main e limpa a branch
+#
+# Fluxo isolado (worktree dedicada, opcional — pra várias frentes em paralelo):
+#   git worktree add ../sheetwise-issue-12 -b issue-12 origin/main
+#   cd ../sheetwise-issue-12 && npm install
+#   ../sheetwise/ticket start 12
+#   ../sheetwise/ticket finish        # de dentro da worktree do ticket
+#
+set -euo pipefail
+
+usage() {
+  cat >&2 <<'EOF'
+Uso:
+  ticket list [args...]   Lista os issues abertos (repassa flags pro `gh issue list`).
+  ticket start <numero>   Abre uma sessão Claude pro issue (/start-ticket) na pasta atual.
+  ticket <numero>         Atalho pra `ticket start <numero>`.
+  ticket finish           Aprova o trabalho atual (/finish-ticket): gates + merge na main
+                          por fast-forward + push + limpa a branch (e a worktree, se dedicada).
+EOF
+}
+
+cmd="${1:-}"
+shift || true
+
+# Atalho: `ticket 12` -> `ticket start 12`.
+if [[ "$cmd" =~ ^[0-9]+$ ]]; then
+  set -- "$cmd" "$@"
+  cmd="start"
+fi
+
+case "$cmd" in
+  list)
+    exec gh issue list --state open "$@"
+    ;;
+
+  start)
+    n="${1:-}"
+    if [ -z "$n" ] || ! [[ "$n" =~ ^[0-9]+$ ]]; then
+      echo "Uso: ticket start <numero-do-issue>" >&2
+      exit 1
+    fi
+    exec claude "/start-ticket $n"
+    ;;
+
+  finish)
+    # Não recebe número: o /finish-ticket descobre o issue pela branch atual.
+    # Roda na pasta atual, que deve estar na branch do ticket a finalizar.
+    exec claude "/finish-ticket"
+    ;;
+
+  ""|-h|--help|help)
+    usage
+    [ -z "$cmd" ] && exit 1 || exit 0
+    ;;
+
+  *)
+    echo "Subcomando desconhecido: $cmd" >&2
+    usage
+    exit 1
+    ;;
+esac
